@@ -30,7 +30,7 @@ public class ClientController {
     ClientRepository repository;
 
     @GetMapping
-    public ResponseEntity<List<ClientDTO>> FindAll() {
+    public ResponseEntity<List<ClientDTO>> findAll() {
         return ResponseEntity.ok(service.findAll());
         /*return Arrays.asList(Client.builder().
                 name("Neuber")

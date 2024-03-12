@@ -16,7 +16,7 @@ public class ClientService {
     ClientRepository repository;
     public List<ClientDTO> findAll() {
         List<Client> listEntidade = repository.findAll();
-        List<ClientDTO> listDTO = listEntidade.stream().map(x -> new ClientDTO(x)).toList();
+        List<ClientDTO> listDTO = listEntidade.stream().map(ClientDTO::new).toList();
         return listDTO ;
 
     }
