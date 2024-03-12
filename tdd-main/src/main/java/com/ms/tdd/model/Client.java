@@ -1,7 +1,9 @@
 package com.ms.tdd.model;
+import domain.dto.ClientDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,6 +28,10 @@ public class Client implements Serializable {
     private String user;
 
  */
+
+    public Client (ClientDTO entidadeDTO) {
+        BeanUtils.copyProperties(entidadeDTO, this);
+    }
 
     public Client() {
         super();

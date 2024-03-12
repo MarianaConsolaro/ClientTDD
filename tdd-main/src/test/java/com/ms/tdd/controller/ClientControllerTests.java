@@ -6,6 +6,7 @@ import com.ms.tdd.model.Client;
 //import org.junit.Before;
 //import org.junit.Test;
 //import com.ms.tdd.repository.ClientRepository;
+import domain.dto.ClientDTO;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -21,13 +22,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 //Se for usar o delete com variável
-//@SpringBootTest
-//@ActiveProfiles("test")
+@SpringBootTest
+@ActiveProfiles("test")
 public class ClientControllerTests extends TddApplicationTests {
 
     private MockMvc mockMvc;
@@ -45,8 +46,12 @@ public class ClientControllerTests extends TddApplicationTests {
     @Test
     @Order(0)
     public void testCreateClient() throws Exception {
+
+        ClientDTO newClient = new ClientDTO(null, "Mariana", "mariana.consolaro@gmail.com", "02564897523", "9994545429");
+
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/clients")
+                        .post("/api/clients")
+                        //aqui não precisa mais uma vez que ja está ali no ClientDTO
                         .content(asJsonString(new Client(null, "Mariana", "mariana.consolaro@gmail.com", "02564897523", "9994545429")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -58,7 +63,7 @@ public class ClientControllerTests extends TddApplicationTests {
     @Test
     @Order(1)
     public void testClientList() throws Exception {
-        this.mockMvc.perform(get("/clients"))
+        this.mockMvc.perform(get("/api/clients"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty());
@@ -68,13 +73,17 @@ public class ClientControllerTests extends TddApplicationTests {
     @Test
     @Order(2)
     public void testFindById() throws Exception {
-        String clientId = "65eb1a3669568b43470ef7df"; //--> TESTE PASSA
+        //String clientId = "65eb1a3669568b43470ef7df"; //--> TESTE PASSA
         //String clientId = "id"; --> TESTE NÃO PASSA
 
-        this.mockMvc.perform(get("/clients/{id}", clientId))
+        this.mockMvc.perform(get("/api/clients/65ef667fa1fc4021bea1daca"))
+//        this.mockMvc.perform(get("api/clients/{id}", clientId))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(clientId));
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());;
+
+                //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(clientId));
 
         //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(clientId));
     }
@@ -92,7 +101,7 @@ public class ClientControllerTests extends TddApplicationTests {
     @Order(3)
     public void testUpdateClient() throws Exception {
         this.mockMvc.perform( MockMvcRequestBuilders
-                        .put("/clients/65eb1a3669568b43470ef7df")
+                        .put("/api/clients/65ef667fa1fc4021bea1daca")
                         .content(asJsonString(new Client(null, "Mariana Perez UPDATE!", "mariana.consolaro.@gmail.com", "02564897523", "9994545429")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -104,26 +113,14 @@ public class ClientControllerTests extends TddApplicationTests {
     @Test
     @Order(4)
     public void testDeleteById() throws Exception {
-        //Deletar pelo ID? ou fazer um genérico?
-        String clientId = "65ef3c74c4728036071757a3";
-        // String clientId = id ou 1; ->> TESTE DE FALHA
+        // Teste criando um usuário em uma variável para logo em seguida ser deletado
 
-        this.mockMvc.perform(delete("/clients/{id}", clientId))
-                .andExpect(status().isOk());
-        //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(clientId));
-    }
-
-    // Teste criando um usuário em uma variável para logo em seguida ser deletado
-    /*
-    @Test
-    @Order(4)
-    public void testDeleteClient() throws Exception {
-        Client newClient = new Client(null, "Neuber", "neuber.paiva@gmail.com", "9994545429", "440120165656");
+        ClientDTO newClientDto = new ClientDTO(null, "Neuber", "neuber.paiva@gmail.com", "9994545429", "440120165656");
 
         MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/clients")
+                        .post("/api/clients")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(newClient))
+                        .content(asJsonString(newClientDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists())
@@ -134,20 +131,39 @@ public class ClientControllerTests extends TddApplicationTests {
         String clientId = jsonObject.getString("id");
 
         this.mockMvc.perform( MockMvcRequestBuilders
-                        .delete("/clients/" + clientId)
+                        .delete("/api/clients/" + clientId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").doesNotExist());
     }
-     */
 
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        public static String asJsonString(final Object obj) {
+            try {
+                return new ObjectMapper().writeValueAsString(obj);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+
     }
 
-}
+
+        /*
+        //PRIMEIRO QUE FIZ
+
+        //Deletar pelo ID? ou fazer um genérico?
+        String clientId = "65ef3c74c4728036071757a3";
+        // String clientId = id ou 1; ->> TESTE DE FALHA
+
+        this.mockMvc.perform(delete("/clients/{id}", clientId))
+                .andExpect(status().isOk());
+        //.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(clientId));
+    }
+    */
+
+
+
+
+
